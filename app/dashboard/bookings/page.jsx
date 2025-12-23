@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useDashboard } from '@/components/DashboardContext'
 
@@ -8,11 +8,116 @@ const fmtDate = (t) =>
   new Date(t).toLocaleDateString(undefined, { month: 'short', day: '2-digit', year: 'numeric' })
 const fmtTime = (t) =>
   new Date(t).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
-const fmtDay = (t) =>
-  new Date(t).toLocaleDateString(undefined, { weekday: 'long' })
 
-function BookingDetail({ booking, onClose, onUpdate }) {
-  // ESC to close
+function StatusPill({ status }) {
+  const isGood = status === 'Confirmed'
+  const isWarn = status === 'Pending' || status === 'No-show risk'
+  return (
+    <span
+      className="badge"
+      style={{
+        borderColor: isGood
+          ? 'rgba(202,255,75,.35)'
+          : isWarn
+          ? 'rgba(255,226,102,.28)'
+          : 'rgba(255,255,255,.12)',
+        background: isGood
+          ? 'rgba(202,255,75,.10)'
+          : isWarn
+          ? 'rgba(255,226,102,.08)'
+          : 'rgba(0,0,0,.18)',
+        color: 'rgba(255,255,255,.82)',
+      }}
+    >
+      {status}
+    </span>
+  )
+}
+
+function ChannelPill({ channel }) {
+  return (
+    <span className="badge" style={{ background: 'rgba(255,255,255,.04)' }}>
+      {channel}
+    </span>
+  )
+}
+
+function BookingRow({ b, onOpen }) {
+  return (
+    <button
+      type="button"
+      className="panel bookingRow"
+      onClick={() => onOpen(b.id)}
+      style={{
+        padding: 14,
+        textAlign: 'left',
+        background: 'rgba(255,255,255,.03)',
+        cursor: 'pointer',
+        width: '100%',
+      }}
+      aria-label={`Open booking ${b.guest}`}
+    >
+      <div
+        className="bookingGrid"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1.2fr .6fr .6fr .7fr .7fr',
+          gap: 12,
+          alignItems: 'center',
+        }}
+      >
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', minWidth: 0 }}>
+          <div style={{ fontWeight: 750, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {b.guest} · {b.partySize}
+          </div>
+        </div>
+
+        <div style={{ color: 'var(--muted)' }}>{fmtDate(b.time)}</div>
+        <div style={{ color: 'var(--muted)' }}>{fmtTime(b.time)}</div>
+
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          <StatusPill status={b.status} />
+        </div>
+
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', justifyContent: 'space-between' }}>
+          <ChannelPill channel={b.channel} />
+          {b.note ? (
+            <span
+              style={{
+                color: 'var(--muted)',
+                fontSize: 13,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                maxWidth: 240,
+                textAlign: 'right',
+              }}
+              title={b.note}
+            >
+              Note: {b.note}
+            </span>
+          ) : (
+            <span style={{ color: 'var(--muted)', fontSize: 13 }} />
+          )}
+        </div>
+      </div>
+    </button>
+  )
+}
+
+function BookingDetailModal({ booking, onClose }) {
+  // Hooks SIEMPRE en el mismo orden (booking puede ser null, pero no rompemos hooks)
+  const [noteDraft, setNoteDraft] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [toast, setToast] = useState(null)
+
+  useEffect(() => {
+    // sincroniza cuando cambia la reserva seleccionada
+    setNoteDraft(booking?.note ?? '')
+    setToast(null)
+    setSaving(false)
+  }, [booking?.id])
+
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === 'Escape') onClose()
@@ -21,250 +126,210 @@ function BookingDetail({ booking, onClose, onUpdate }) {
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  if (!booking) return null
-
-  const dateObj = new Date(booking.time)
-  const iso = dateObj.toISOString()
-  const ref = booking.id || `BKG-${iso.slice(11, 19).replaceAll(':', '')}`
-
-  // demo-only derived fields (optional)
-  const derived = {
-    email: `${(booking.guest || 'guest').toLowerCase().replace(/\s+/g, '.')}@example.com`,
-    phone: '+34 600 000 000',
-    area: 'Main dining',
-    table: 'Auto-assign',
-    createdAt: new Date(dateObj.getTime() - 1000 * 60 * 60 * 6).toISOString(),
-    updatedAt: new Date(dateObj.getTime() - 1000 * 60 * 22).toISOString(),
-  }
-
-  const status = booking.status || 'Pending'
-  const channel = booking.channel || 'Direct'
-
-  // Local editable state (mock UI)
-  const [noteDraft, setNoteDraft] = useState(booking.note || '')
-  const [saving, setSaving] = useState(false)
-  const [toast, setToast] = useState(null)
-
-  useEffect(() => {
-    setNoteDraft(booking.note || '')
-    setToast(null)
-  }, [booking?.id])
-
-  const flash = (msg) => {
-    setToast(msg)
-    setTimeout(() => setToast(null), 1200)
-  }
-
-  const updateStatus = async (nextStatus) => {
-    setSaving(true)
-    try {
-      // mock delay (feels real)
-      await new Promise((r) => setTimeout(r, 240))
-      onUpdate?.(booking.id, { status: nextStatus })
-      flash(`Status: ${nextStatus}`)
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const saveNote = async () => {
-    setSaving(true)
-    try {
-      await new Promise((r) => setTimeout(r, 260))
-      onUpdate?.(booking.id, { note: noteDraft.trim() })
-      flash('Note saved')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const copyRef = async () => {
-    try {
-      await navigator.clipboard.writeText(ref)
-      flash('Reference copied')
-    } catch {
-      flash('Copy failed')
-    }
-  }
+  const b = booking
+  const visible = !!b
 
   return (
     <AnimatePresence>
-      <motion.div
-        className="modalOverlay"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onMouseDown={onClose}
-        aria-modal="true"
-        role="dialog"
-      >
-        <motion.div
-          className="modalCard"
-          initial={{ opacity: 0, y: 12, scale: 0.99 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 12, scale: 0.99 }}
-          transition={{ type: 'spring', stiffness: 420, damping: 32 }}
-          onMouseDown={(e) => e.stopPropagation()}
-        >
-          <div className="modalTop">
-            <div>
-              <div className="modalTitle">Booking details</div>
-              <div className="modalSub">
-                Reference <button className="linkPill" onClick={copyRef}><span className="kbd">{ref}</span></button>
-                <span style={{ margin: '0 10px', opacity: 0.45 }}>•</span>
-                <span className="small">{fmtDay(booking.time)}</span>
+      {visible && (
+        <>
+          <motion.div
+            key="overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0,0,0,.55)',
+              backdropFilter: 'blur(6px)',
+              zIndex: 80,
+            }}
+          />
+
+          <motion.div
+            key="modal"
+            initial={{ opacity: 0, y: 12, scale: 0.985 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.99 }}
+            transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+            style={{
+              position: 'fixed',
+              right: 18,
+              top: 18,
+              bottom: 18,
+              width: 'min(560px, calc(100vw - 36px))',
+              zIndex: 90,
+              borderRadius: 22,
+              border: '1px solid rgba(255,255,255,.12)',
+              background:
+                'radial-gradient(900px 340px at 10% 0%, rgba(202,255,75,.10), transparent 60%), rgba(12,14,18,.72)',
+              boxShadow: '0 26px 90px rgba(0,0,0,.62)',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Booking details"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div style={{ padding: 16, borderBottom: '1px solid rgba(255,255,255,.08)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontSize: 18, fontWeight: 850, letterSpacing: '-0.02em' }}>
+                    {b.guest} · {b.partySize}
+                  </div>
+                  <div style={{ color: 'var(--muted)', marginTop: 6, fontSize: 13 }}>
+                    {fmtDate(b.time)} · {fmtTime(b.time)} · <span style={{ opacity: 0.9 }}>{b.channel}</span>
+                  </div>
+                </div>
+                <button className="btn" onClick={onClose} type="button" aria-label="Close details">
+                  Close
+                </button>
+              </div>
+
+              <div style={{ marginTop: 12, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <StatusPill status={b.status} />
+                <ChannelPill channel={b.channel} />
+                <span className="badge" style={{ background: 'rgba(0,0,0,.18)' }}>
+                  ID · {b.id}
+                </span>
               </div>
             </div>
 
-            <div className="row" style={{ gap: 10, alignItems: 'center' }}>
-              <span className={`badge ${status === 'Confirmed' ? 'badgeGlow' : ''}`}>{status}</span>
-              <button className="btn" onClick={onClose}>Close</button>
-            </div>
-          </div>
-
-          {/* ACTION BAR */}
-          <div className="actionBar">
-            <div className="row" style={{ flexWrap: 'wrap' }}>
-              <button
-                className={`btn btnPrimary`}
-                disabled={saving || status === 'Confirmed'}
-                onClick={() => updateStatus('Confirmed')}
-                title="Confirm booking"
-              >
-                {saving && status !== 'Confirmed' ? 'Working…' : 'Confirm'}
-              </button>
-
-              <button
-                className="btn"
-                disabled={saving || status === 'Pending'}
-                onClick={() => updateStatus('Pending')}
-                title="Mark as pending"
-              >
-                Pending
-              </button>
-
-              <button
-                className="btn"
-                disabled={saving || status === 'No-show risk'}
-                onClick={() => updateStatus('No-show risk')}
-                title="Flag as no-show risk"
-              >
-                No-show risk
-              </button>
-
-              <button
-                className="btn"
-                disabled={saving}
-                onClick={() => { setNoteDraft(''); flash('Note cleared') }}
-                title="Clear note draft"
-              >
-                Clear note
-              </button>
-            </div>
-
-            <div className="row" style={{ gap: 10 }}>
-              <span className="small" style={{ opacity: 0.9 }}>
-                Channel: <span style={{ color: 'rgba(255,255,255,.86)', fontWeight: 700 }}>{channel}</span>
-              </span>
-              {toast && <span className="toastPill">{toast}</span>}
-            </div>
-          </div>
-
-          <div className="modalGrid">
-            <div className="field">
-              <div className="label">Guest</div>
-              <div className="value">{booking.guest}</div>
-              <div className="hint">
-                {derived.email} · {derived.phone}
-              </div>
-            </div>
-
-            <div className="field">
-              <div className="label">Party</div>
-              <div className="value">{booking.partySize} guests</div>
-              <div className="hint">Preferences: —</div>
-            </div>
-
-            <div className="field">
-              <div className="label">Date & time</div>
-              <div className="value">
-                {fmtDate(booking.time)} · {fmtTime(booking.time)}
-              </div>
-              <div className="hint">Local time</div>
-            </div>
-
-            <div className="field">
-              <div className="label">Table</div>
-              <div className="value">{derived.table}</div>
-              <div className="hint">{derived.area}</div>
-            </div>
-
-            {/* NOTES (editable) */}
-            <div className="field full">
-              <div className="label">Notes</div>
-              <textarea
-                className="input"
-                value={noteDraft}
-                onChange={(e) => setNoteDraft(e.target.value)}
-                rows={4}
-                placeholder="Add internal note (all demo / mock)."
-                style={{ marginTop: 10, resize: 'none' }}
-              />
-              <div className="row" style={{ justifyContent: 'space-between', marginTop: 10, flexWrap: 'wrap' }}>
-                <div className="hint">
-                  Created {new Date(derived.createdAt).toLocaleString()} · Updated{' '}
-                  {new Date(derived.updatedAt).toLocaleString()}
+            {/* Body */}
+            <div style={{ padding: 16, overflow: 'auto' }}>
+              <div className="grid" style={{ gap: 12 }}>
+                <div className="panel" style={{ padding: 14, background: 'rgba(255,255,255,.03)' }}>
+                  <div style={{ fontWeight: 850, letterSpacing: '-0.01em' }}>Guest details</div>
+                  <div style={{ height: 10 }} />
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                    <div>
+                      <div style={{ color: 'var(--muted)', fontSize: 12 }}>Phone</div>
+                      <div style={{ marginTop: 6, fontWeight: 700 }}>{b.phone ?? '—'}</div>
+                    </div>
+                    <div>
+                      <div style={{ color: 'var(--muted)', fontSize: 12 }}>Email</div>
+                      <div style={{ marginTop: 6, fontWeight: 700 }}>{b.email ?? '—'}</div>
+                    </div>
+                    <div>
+                      <div style={{ color: 'var(--muted)', fontSize: 12 }}>Tags</div>
+                      <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        {(b.tags ?? ['VIP', 'Allergies?']).map((t) => (
+                          <span key={t} className="badge" style={{ background: 'rgba(255,255,255,.04)' }}>
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ color: 'var(--muted)', fontSize: 12 }}>Table preference</div>
+                      <div style={{ marginTop: 6, fontWeight: 700 }}>{b.tablePref ?? '—'}</div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="row" style={{ gap: 10 }}>
-                  <button className="btn" disabled={saving} onClick={() => setNoteDraft(booking.note || '')}>
-                    Reset
-                  </button>
-                  <button className="btn btnPrimary" disabled={saving} onClick={saveNote}>
-                    {saving ? 'Saving…' : 'Save note'}
-                  </button>
+                <div className="panel" style={{ padding: 14, background: 'rgba(255,255,255,.03)' }}>
+                  <div style={{ fontWeight: 850, letterSpacing: '-0.01em' }}>Notes</div>
+                  <div style={{ color: 'var(--muted)', marginTop: 6, fontSize: 13 }}>
+                    Internal note for the team (demo).
+                  </div>
+                  <div style={{ height: 10 }} />
+                  <textarea
+                    className="input"
+                    rows={5}
+                    value={noteDraft}
+                    onChange={(e) => setNoteDraft(e.target.value)}
+                    style={{ resize: 'vertical' }}
+                    placeholder="Add special requests, allergies, timing notes…"
+                  />
+                  <div style={{ height: 10 }} />
+                  <div style={{ display: 'flex', gap: 10, justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ color: 'var(--muted)', fontSize: 13 }}>
+                      {toast ? <span style={{ color: 'rgba(202,255,75,.9)' }}>{toast}</span> : ' '}
+                    </div>
+                    <button
+                      className="btn btnPrimary"
+                      type="button"
+                      disabled={saving}
+                      onClick={async () => {
+                        setSaving(true)
+                        // demo save (sin backend)
+                        await new Promise((r) => setTimeout(r, 450))
+                        setSaving(false)
+                        setToast('Saved (demo)')
+                        setTimeout(() => setToast(null), 1200)
+                      }}
+                    >
+                      {saving ? 'Saving…' : 'Save note'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="panel" style={{ padding: 14, background: 'rgba(255,255,255,.03)' }}>
+                  <div style={{ fontWeight: 850, letterSpacing: '-0.01em' }}>Operational</div>
+                  <div style={{ height: 10 }} />
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                    <div>
+                      <div style={{ color: 'var(--muted)', fontSize: 12 }}>Created</div>
+                      <div style={{ marginTop: 6, fontWeight: 700 }}>{b.createdAt ? fmtDate(b.createdAt) : '—'}</div>
+                    </div>
+                    <div>
+                      <div style={{ color: 'var(--muted)', fontSize: 12 }}>Source</div>
+                      <div style={{ marginTop: 6, fontWeight: 700 }}>{b.source ?? b.channel ?? '—'}</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </motion.div>
-      </motion.div>
+
+            {/* Footer */}
+            <div
+              style={{
+                padding: 14,
+                borderTop: '1px solid rgba(255,255,255,.08)',
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: 10,
+              }}
+            >
+              <button className="btn" onClick={onClose} type="button">
+                Done
+              </button>
+            </div>
+          </motion.div>
+        </>
+      )}
     </AnimatePresence>
   )
 }
 
-
 export default function Bookings() {
   const { bookings, query } = useDashboard()
   const [status, setStatus] = useState('All')
-  const [selected, setSelected] = useState(null)
-
-  const [localBookings, setLocalBookings] = useState(bookings)
-
-  useEffect(() => {
-    setLocalBookings(bookings)
-  }, [bookings])
-
-  const onUpdate = (id, patch) => {
-    setLocalBookings((prev) => prev.map((b) => (b.id === id ? { ...b, ...patch } : b)))
-    // también actualiza el seleccionado para que se refleje instantáneo
-    setSelected((prev) => (prev?.id === id ? { ...prev, ...patch } : prev))
-  }
-
+  const [openId, setOpenId] = useState(null)
 
   const rows = useMemo(() => {
-    const base = localBookings
+    const base = bookings
     const s = status === 'All' ? base : base.filter((b) => b.status === status)
     return s
-  }, [localBookings, status])
+  }, [bookings, status])
 
+  const selected = useMemo(() => rows.find((b) => b.id === openId) ?? bookings.find((b) => b.id === openId) ?? null, [
+    openId,
+    rows,
+    bookings,
+  ])
 
   return (
     <div>
       <div className="row" style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
         <div>
-          <div className="pageTitle">Bookings</div>
-          <div className="pageSub">
+          <div style={{ fontSize: 22, fontWeight: 850, letterSpacing: '-0.02em' }}>Bookings</div>
+          <div style={{ color: 'var(--muted)', marginTop: 6 }}>
             Filtered by sidebar search{query ? `: “${query}”` : ''}.
           </div>
         </div>
@@ -279,6 +344,7 @@ export default function Bookings() {
                 background: status === s ? 'rgba(202,255,75,.10)' : undefined,
                 borderColor: status === s ? 'rgba(202,255,75,.35)' : undefined,
               }}
+              type="button"
             >
               {s}
             </button>
@@ -293,7 +359,7 @@ export default function Bookings() {
           style={{
             display: 'grid',
             gridTemplateColumns: '1.2fr .6fr .6fr .7fr .7fr',
-            gap: 10,
+            gap: 12,
             color: 'var(--muted)',
             fontSize: 12,
           }}
@@ -309,50 +375,19 @@ export default function Bookings() {
 
         <div className="grid" style={{ gap: 10 }}>
           {rows.slice(0, 16).map((b, i) => (
-            <motion.button
+            <motion.div
               key={b.id}
-              type="button"
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.02 }}
-              className="bookingRow"
-              onClick={() => setSelected(b)}
             >
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1.2fr .6fr .6fr .7fr .7fr',
-                  gap: 10,
-                  alignItems: 'center',
-                }}
-              >
-                <div style={{ fontWeight: 700 }}>
-                  {b.guest} · {b.partySize}
-                </div>
-                <div style={{ color: 'var(--muted)' }}>{fmtDate(b.time)}</div>
-                <div style={{ color: 'var(--muted)' }}>{fmtTime(b.time)}</div>
-                <div>
-                  <span className={`badge ${b.status === 'Confirmed' ? 'badgeGlow' : ''}`}>
-                    {b.status}
-                  </span>
-                </div>
-                <div className="row" style={{ justifyContent: 'space-between' }}>
-                  <span className="badge">{b.channel}</span>
-                  <span className="arrow">↗</span>
-                </div>
-              </div>
-
-              {b.note && (
-                <div style={{ marginTop: 10, color: 'var(--muted)', fontSize: 13 }}>
-                  Note: {b.note}
-                </div>
-              )}
-            </motion.button>
+              <BookingRow b={b} onOpen={setOpenId} />
+            </motion.div>
           ))}
         </div>
       </div>
 
-      <BookingDetail booking={selected} onClose={() => setSelected(null)} onUpdate={onUpdate} />
-      </div>
+      <BookingDetailModal booking={selected} onClose={() => setOpenId(null)} />
+    </div>
   )
 }
