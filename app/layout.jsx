@@ -1,4 +1,5 @@
 import './globals.css'
+import FeedbackToggle from '@/components/FeedbackToggle'
 
 export const metadata = {
   title: 'TapIn · Demo',
@@ -11,6 +12,7 @@ export default function RootLayout({ children }) {
       <body>
         <div className="bg" />
         {children}
+        <FeedbackToggle />
       </body>
     </html>
   )

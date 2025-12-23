@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import StatCard from '@/components/StatCard'
 import { useDashboard } from '@/components/DashboardContext'
+import TiltCard from '@/components/TiltCard'
+
 
 const fmt = (t) => new Date(t).toLocaleString(undefined,{weekday:'short',hour:'2-digit',minute:'2-digit'})
 
@@ -30,10 +32,10 @@ export default function Dashboard(){
 
       <div style={{height:14}} />
       <div className="grid" style={{gridTemplateColumns:'repeat(auto-fit,minmax(210px,1fr))'}}>
-        <StatCard label="Bookings" value={total} hint="in memory (demo)" />
-        <StatCard label="Confirmed" value={confirmed} hint="ready to seat" />
-        <StatCard label="Pending" value={pending} hint="needs confirmation" />
-        <StatCard label="No-show risk" value={risk} hint="consider SMS" />
+      <TiltCard><StatCard label="Bookings" value={total} hint="in memory (demo)" /></TiltCard>
+  <TiltCard><StatCard label="Confirmed" value={confirmed} hint="ready to seat" /></TiltCard>
+  <TiltCard><StatCard label="Pending" value={pending} hint="needs confirmation" /></TiltCard>
+  <TiltCard><StatCard label="No-show risk" value={risk} hint="consider SMS" /></TiltCard>
       </div>
 
       <div style={{height:14}} />

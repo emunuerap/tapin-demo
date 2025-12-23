@@ -1,0 +1,84 @@
+/* src/styles/glass.css */
+
+/* Base: fondo con luz suave (sin colores “chillones”) */
+:root{
+    --glass-bg: rgba(255,255,255,.08);
+    --glass-stroke: rgba(255,255,255,.14);
+    --glass-hi: rgba(255,255,255,.20);
+    --shadow: 0 24px 80px rgba(0,0,0,.35);
+    --shadow-soft: 0 12px 40px rgba(0,0,0,.25);
+    --radius-xl: 28px;
+    --radius-lg: 22px;
+  }
+  
+  /* Panel glass real */
+  .glass{
+    background: linear-gradient(180deg, var(--glass-hi), var(--glass-bg));
+    border: 1px solid var(--glass-stroke);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(18px) saturate(120%);
+    -webkit-backdrop-filter: blur(18px) saturate(120%);
+  }
+  
+  /* “Rim light” interior */
+  .glass::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius: inherit;
+    pointer-events:none;
+    background: radial-gradient(1200px 600px at 20% 10%, rgba(255,255,255,.18), transparent 45%),
+                radial-gradient(900px 500px at 90% 30%, rgba(255,255,255,.10), transparent 50%);
+    mix-blend-mode: screen;
+    opacity:.9;
+  }
+  
+  /* Borde superior tipo vidrio */
+  .glass-edge{
+    position: relative;
+    overflow: hidden;
+  }
+  .glass-edge::after{
+    content:"";
+    position:absolute;
+    left:-40%;
+    top:-60%;
+    width:180%;
+    height:160%;
+    background: linear-gradient(120deg, transparent 35%, rgba(255,255,255,.14) 50%, transparent 65%);
+    transform: rotate(8deg);
+    opacity:.55;
+    pointer-events:none;
+  }
+  
+  /* Botón premium */
+  .btn{
+    display:inline-flex;
+    gap:.55rem;
+    align-items:center;
+    justify-content:center;
+    padding:.9rem 1.05rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.18);
+    background: rgba(255,255,255,.10);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: var(--shadow-soft);
+    transition: transform .18s ease, background .18s ease, border-color .18s ease;
+    user-select:none;
+  }
+  .btn:hover{
+    transform: translateY(-1px);
+    background: rgba(255,255,255,.14);
+    border-color: rgba(255,255,255,.26);
+  }
+  .btn:active{
+    transform: translateY(0px) scale(.99);
+  }
+  
+  /* Texto */
+  .muted{ opacity:.75; }
+
+
+  
