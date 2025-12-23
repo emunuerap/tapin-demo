@@ -247,8 +247,7 @@ export default function Widget() {
 
               <div style={{ height: 10 }} />
               <div style={{ color: 'rgba(255,255,255,.65)', fontSize: 13, lineHeight: 1.5 }}>
-                In production this would send a confirmation + allow edits. Here it’s a portfolio-friendly UX snapshot.
-              </div>
+              The flow simulates confirmation and generates a booking code. Availability and persistence are mocked in memory for demonstration purposes.              </div>
 
               <div style={{ height: 14 }} />
               <button
@@ -263,8 +262,7 @@ export default function Widget() {
       </div>
 
       <div style={{ height: 10, color: 'rgba(255,255,255,.55)', fontSize: 12, textAlign: 'center' }}>
-        Demo widget · query: restaurant={restaurantId} · accent={accentKey}
-      </div>
+      Embeddable widget · parameters: restaurant · accent · compact      </div>
     </div>
   )
 }

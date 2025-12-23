@@ -54,7 +54,7 @@ export default function WidgetDemo(){
             </label>
             <div className="hr" />
             <div style={{color:'var(--muted)',fontSize:13,lineHeight:1.5}}>
-              Drop this in an iframe or publish as a JS loader. For your portfolio, link directly to <code>/embed/widget</code>.
+            This page previews the embeddable widget. The widget can be integrated via iframe or by consuming the embed route directly.
             </div>
           </div>
 
