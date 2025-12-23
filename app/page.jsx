@@ -10,7 +10,7 @@ export default function Home() {
         <div className="heroTop">
           <div className="brandRow">
             <img
-              src="/brand/tapin-logo.png"
+              src="/brand/tapin_logo.png"
               alt="TapIn"
               className="brandLogo"
             />
@@ -21,7 +21,7 @@ export default function Home() {
           </div>
 
           <div className="prefsLink">
-            <Link className="btn" href="/settings">Settings</Link>
+            <Link className="btn" href="/dashboard/settings">Settings</Link>
           </div>
         </div>
 

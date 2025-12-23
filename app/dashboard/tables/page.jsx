@@ -50,7 +50,7 @@ export default function Tables(){
 
         <div className="panel" style={{padding:16}}>
           <div style={{fontWeight:800}}>Live map (cards)</div>
-          <div style={{color:'var(--muted)',marginTop:6,fontSize:13}}>A quick at-a-glance layout — replace with your 3D floorplan later.</div>
+          <div style={{color:'var(--muted)',marginTop:6,fontSize:13}}>A quick at-a-glance layout — replace with our 3D floorplan later.</div>
           <div className="hr" />
           <div className="grid" style={{gridTemplateColumns:'repeat(2,minmax(0,1fr))'}}>
             {tables.map((t,i)=>(

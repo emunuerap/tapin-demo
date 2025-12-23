@@ -58,8 +58,9 @@
        radial-gradient(1200px 800px at 18% -10%, rgba(202,255,75,.10), transparent 55%),
        radial-gradient(900px 700px at 90% 10%, rgba(255,226,102,.08), transparent 60%),
        linear-gradient(180deg, var(--bg0), var(--bg1));
-     font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-     letter-spacing:-0.01em;
+       font-family: var(--font-ui), ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+       -webkit-font-smoothing: antialiased;
+       -moz-osx-font-smoothing: grayscale;     letter-spacing:-0.01em;
      overflow-x:hidden;
    }
    a{ color:inherit; text-decoration:none; }
@@ -162,7 +163,8 @@
       Typography (legacy + new)
    ------------------------- */
    h1{ font-size:44px; line-height:1.02; margin:0 0 10px; }
-   h2{ font-size:24px; margin:0; }
+   h2{ font-size:24px; margin:0;      font-weight:650;
+   }
    
    .h1{
      font-size: clamp(26px, 4vw, 40px);
@@ -174,9 +176,11 @@
    .h2{
      font-size:18px;
      color: var(--muted);
-     font-weight:500;
+     font-weight:650;
      margin:0;
    }
+
+ 
    .p{ color:var(--muted); line-height:1.55; margin:0; }
    .small{ color:var(--muted); font-size:12px; line-height:1.5; }
    
@@ -247,6 +251,11 @@
      border-color: rgba(202,255,75,.52);
      background: rgba(202,255,75,.16);
    }
+
+   .btn, .badge{
+    font-weight: 650; /* baja la sensación “tocha” */
+    letter-spacing: -0.01em;
+  }
    
    /* -------------------------
       Inputs
@@ -280,7 +289,8 @@
      background: rgba(0,0,0,.18);
      color: rgba(255,255,255,.76);
      font-size:12px;
-     font-weight:800;
+     font-weight:650;
+     letter-spacing: -0.01em;
    }
    .badgeGlow{
      border-color: rgba(202,255,75,.22);
@@ -487,4 +497,200 @@
    @media (max-width: 920px){
      .heroGrid{ grid-template-columns: 1fr; }
    }
-   
+
+   .pageTitle, .h1, h1{
+    font-size: 22px;
+    font-family: var(--font-display), var(--font-ui), system-ui;
+    font-weight: 700; /* antes era demasiado “black” */
+    letter-spacing: -0.04em;
+  }
+  
+.pageSub{ margin-top:6px; color:var(--muted); font-size:13.5px; }
+
+.setPanel{ padding: 16px; }
+.setHeader{ padding: 2px 2px 12px; }
+.setH{ font-weight: 750; letter-spacing:-0.02em; }
+.setHint{ margin-top:6px; color:var(--muted); font-size:13px; line-height:1.55; }
+
+.setGroup{
+  margin-top: 10px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.16);
+  overflow: hidden;
+}
+
+.setRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 16px;
+  padding: 14px;
+}
+
+.setTitle{ font-weight: 700; letter-spacing:-0.01em; }
+.setDesc{ margin-top:5px; color:var(--muted); font-size:13px; line-height:1.5; }
+
+.divider{ height:1px; background: rgba(255,255,255,.08); }
+
+.setFoot{
+  margin-top: 10px;
+  color: rgba(255,255,255,.55);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* Switch premium */
+.switch{
+  width: 52px; height: 32px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  position: relative;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.switch .knob{
+  position:absolute; top:50%; left: 6px;
+  width: 22px; height: 22px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: rgba(255,255,255,.78);
+  box-shadow: 0 10px 24px rgba(0,0,0,.35);
+  transition: left .18s ease, background .18s ease;
+}
+.switch.on{
+  background: rgba(202,255,75,.16);
+  border-color: rgba(202,255,75,.30);
+  box-shadow: 0 0 0 4px rgba(202,255,75,.10);
+}
+.switch.on .knob{ left: 24px; background: rgba(202,255,75,.95); }
+
+.bookingRow{
+  width:100%;
+  text-align:left;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  padding: 14px;
+  cursor: pointer;
+  color: var(--text);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 14px;
+  transition: transform .16s ease, border-color .16s ease, background .16s ease, box-shadow .16s ease;
+}
+.bookingRow:hover{
+  transform: translateY(-2px);
+  border-color: rgba(202,255,75,.22);
+  background: rgba(255,255,255,.06);
+  box-shadow: 0 18px 50px rgba(0,0,0,.35);
+}
+.bookingName{ font-weight: 750; letter-spacing:-0.01em; }
+.bookingMeta{ margin-top:5px; color: var(--muted); font-size: 13px; }
+
+.modalOverlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(10px);
+  z-index: 100;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 18px;
+  animation: modalFade .18s ease both;
+}
+@keyframes modalFade{ from{opacity:0} to{opacity:1} }
+
+.modalCard{
+  width: min(860px, 100%);
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(10,12,17,.82);
+  box-shadow: 0 30px 110px rgba(0,0,0,.7);
+  backdrop-filter: blur(14px);
+  overflow:hidden;
+  animation: modalUp .20s ease both;
+}
+@keyframes modalUp{ from{opacity:.6; transform:translateY(10px) scale(.99)} to{opacity:1; transform:translateY(0) scale(1)} }
+
+.modalTop{
+  padding: 16px;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.modalTitle{ font-weight: 800; letter-spacing:-0.02em; }
+.modalSub{ margin-top:6px; color: var(--muted); font-size: 13px; }
+
+.modalGrid{
+  padding: 16px;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.field{
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  padding: 12px;
+}
+.field.full{ grid-column: 1 / -1; }
+.label{ color: rgba(255,255,255,.65); font-size: 12px; font-weight: 700; }
+.value{ margin-top: 6px; font-weight: 750; letter-spacing:-0.01em; }
+.hint{ margin-top: 6px; color: var(--muted); font-size: 13px; line-height:1.5; }
+
+@media (max-width: 860px){
+  .modalGrid{ grid-template-columns: 1fr; }
+}
+
+.actionBar{
+  padding: 12px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  background: radial-gradient(700px 220px at 10% 0%, rgba(202,255,75,.06), transparent 62%),
+              rgba(255,255,255,.02);
+}
+
+.toastPill{
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(202,255,75,.22);
+  background: rgba(202,255,75,.08);
+  color: rgba(255,255,255,.88);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.linkPill{
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+.linkPill:hover .kbd{
+  border-color: rgba(202,255,75,.24);
+  box-shadow: 0 0 0 3px rgba(202,255,75,.10);
+}
+
+.btn.btnPrimary{ /* por compat si no existe */
+  border-color: rgba(202,255,75,.36);
+  background: rgba(202,255,75,.12);
+}
+.btn:disabled{
+  opacity: .55;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}

@@ -147,7 +147,7 @@ export default function DashboardShell({ children }) {
           </div>
           <div className="hr" />
           <div style={{color:'var(--muted)',fontSize:13,lineHeight:1.4}}>
-            This demo keeps data in-memory. Use it as a portfolio preview for TapIn.
+            This demo keeps data in-memory. Used as a portfolio preview for TapIn.
           </div>
         </aside>
 
