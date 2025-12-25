@@ -8,17 +8,18 @@ export default function Home() {
     <main className="container">
       <div className="panel hero">
         <div className="heroTop">
-          <div className="brandRow">
-            <img
-              src="/brand/tapin_logo.png"
-              alt="TapIn"
-              className="brandLogo"
-            />
-            <div className="brandMeta">
-              <div className="brandName">TapIn</div>
-              <div className="brandTag">Hospitality Booking · Operations Dashboard · Embeddable Widget</div>
-            </div>
-          </div>
+        <div className="brandRow brandRowWide">
+        <div className="brandLogoWrap">
+    <img src="/brand/tapin_logo.png" alt="TapIn" className="brandLogo" />
+    <img src="/brand/tapinlogo3d.png" alt="" className="brandLogo brandLogoAlt" />
+  </div>
+
+  <div className="brandMeta">
+    <div className="brandName">TapIn</div>
+<div className="brandTag">TFG (UOC) · Functional prototype for booking flow and operations</div>
+  </div>
+</div>
+
 
           <div className="prefsLink">
             <Link className="btn" href="/dashboard/settings">Settings</Link>
